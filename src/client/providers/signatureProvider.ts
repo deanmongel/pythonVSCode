@@ -4,6 +4,7 @@ import * as vscode from "vscode";
 import {TextDocument, Position, CancellationToken, SignatureHelp, ExtensionContext} from "vscode";
 import * as proxy from "./jediProxy";
 import * as telemetryContracts from "../common/telemetryContracts";
+import {utf8Decode} from '../common/helpers';
 
 const DOCSTRING_PARAM_PATTERNS = [
     "\\s*:type\\s*PARAMNAME:\\s*([^\\n, ]+)", // Sphinx
@@ -55,20 +56,22 @@ export class PythonSignatureProvider implements vscode.SignatureHelpProvider {
             signature.activeSignature = 0;
 
             data.definitions.forEach(def => {
+                const docstring = def.docstring;
                 signature.activeParameter = def.paramindex;
                 // Don't display the documentation, as vs code doesn't format the docmentation
                 // i.e. line feeds are not respected, long content is stripped
                 let sig = <vscode.SignatureInformation>{
                     // documentation: def.docstring,
-                    label: def.docstring,
+                    label: utf8Decode(docstring),
                     parameters: []
                 };
                 sig.parameters = def.params.map(arg => {
-                    if (arg.docstring.length === 0) {
-                        arg.docstring = extractParamDocString(arg.name, def.docstring);
+                    let paramDocstring = docstring;
+                    if (docstring.length === 0) {
+                        paramDocstring = extractParamDocString(arg.name, paramDocstring);
                     }
                     return <vscode.ParameterInformation>{
-                        documentation: arg.docstring.length > 0 ? arg.docstring : arg.description,
+                        documentation: paramDocstring.length > 0 ? paramDocstring : arg.description,
                         label: arg.description.length > 0 ? arg.description : arg.name
                     };
                 });

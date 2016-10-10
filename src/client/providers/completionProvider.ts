@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as proxy from './jediProxy';
 import * as telemetryContracts from '../common/telemetryContracts';
+import {utf8Decode} from '../common/helpers';
 
 export class PythonCompletionItemProvider implements vscode.CompletionItemProvider {
     private jediProxyHandler: proxy.JediProxyHandler<proxy.ICompletionResult, vscode.CompletionItem[]>;
@@ -15,7 +16,7 @@ export class PythonCompletionItemProvider implements vscode.CompletionItemProvid
             return data.items.map(item => {
                 let completionItem = new vscode.CompletionItem(item.text);
                 completionItem.kind = item.type;
-                completionItem.documentation = item.description;
+                completionItem.documentation = utf8Decode(item.description);
                 // ensure the built in memebers are at the bottom
                 completionItem.sortText = (completionItem.label.startsWith('__') ? 'z' : (completionItem.label.startsWith('_') ? 'y' : '__')) + completionItem.label;
                 return completionItem;

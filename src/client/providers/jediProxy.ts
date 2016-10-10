@@ -209,7 +209,7 @@ function spawnProcess(dir: string) {
     proc.on("error", error => {
         handleError("error", error);
     });
-
+    proc.stdout.setEncoding('utf8');
     proc.stdout.on("data", (data) => {
         //Possible there was an exception in parsing the data returned
         //So append the data then parse it
@@ -370,6 +370,7 @@ function sendCommand<T extends ICommandResult>(cmd: ICommand<T>): Promise<T> {
         exexcutionCmd.reject = reject;
         exexcutionCmd.delays = new telemetryHelper.Delays();
         try {
+            fs.appendFileSync('/Users/donjayamanne/Desktop/Development/Python/Temp/MyEnvs/pascal/log.log', 'test');
             proc.stdin.write(JSON.stringify(payload) + "\n");
             commands.set(exexcutionCmd.id, exexcutionCmd);
             commandQueue.push(exexcutionCmd.id);

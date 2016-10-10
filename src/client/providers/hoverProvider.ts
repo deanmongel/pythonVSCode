@@ -3,7 +3,7 @@
 import * as vscode from 'vscode';
 import * as proxy from './jediProxy';
 import * as telemetryContracts from "../common/telemetryContracts";
-
+import {utf8Decode} from '../common/helpers';
 
 export class PythonHoverProvider implements vscode.HoverProvider {
     private jediProxyHandler: proxy.JediProxyHandler<proxy.ICompletionResult, vscode.Hover>;
@@ -15,7 +15,7 @@ export class PythonHoverProvider implements vscode.HoverProvider {
         if (data && data.items.length > 0) {
             var definition = data.items[0];
 
-            var txt = definition.description || definition.text;
+            var txt = utf8Decode(definition.description) || definition.text;
             return new vscode.Hover({ language: "python", value: txt });
         }
         return null;

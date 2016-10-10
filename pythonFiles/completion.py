@@ -6,11 +6,24 @@ import json
 import traceback
 sys.path.append(os.path.dirname(__file__))
 import jedi
+from encodings import utf_8, ascii
+import base64
 # remove jedi from path after we import it so it will not be completed
 sys.path.pop(0)
 
 WORD_RE = re.compile(r'\w')
 
+def convert_string_to_utf8(s):
+    # try:
+    #     unicode
+    # except:
+    #     unicode = str
+    # if isinstance(s, unicode):
+    return s
+    # value = str(s.encode('utf8'))
+    # return "___  " + str(value.encode('utf8')) 
+    # else:
+    #     return base64.b64encode(s)
 
 class JediCompletion(object):
     basic_types = {
@@ -110,7 +123,7 @@ class JediCompletion(object):
             sig = {"name": "", "description": "", "docstring": "", 
                    "paramindex": 0, "params": [], "bracketstart": []}
             sig["description"] = signature.description
-            sig["docstring"] = signature.docstring()
+            sig["docstring"] = convert_string_to_utf8(signature.docstring())
             sig["name"] = signature.name
             sig["paramindex"] = signature.index
             sig["bracketstart"].append(signature.index)
@@ -131,7 +144,7 @@ class JediCompletion(object):
                 #if name.startswith('*'):
                 #    continue
                 #_signatures.append((signature, name, value))
-                sig["params"].append({"name": name, "value":value, "docstring":param.docstring(), "description":param.description})
+                sig["params"].append({"name": name, "value":value, "docstring":convert_string_to_utf8(param.docstring()), "description":param.description})
         return _signatures
 
     def _serialize_completions(self, script, identifier=None, prefix=''):
@@ -165,10 +178,10 @@ class JediCompletion(object):
                 _completion['text'] = name
                 _completion['displayText'] = name
             if self.show_doc_strings:
-                _completion['description'] = signature.docstring()
+                _completion['description'] = convert_string_to_utf8(signature.docstring())
             else:
-                _completion['description'] = self._generate_signature(
-                    signature)
+                _completion['description'] = convert_string_to_utf8(self._generate_signature(
+                    signature))
             _completions.append(_completion)
 
         try:
@@ -177,9 +190,9 @@ class JediCompletion(object):
             completions = []
         for completion in completions:
             if self.show_doc_strings:
-                description = completion.docstring()
+                description = convert_string_to_utf8(completion.docstring())
             else:
-                description = self._generate_signature(completion)
+                description = convert_string_to_utf8(self._generate_signature(completion))
             _completion = {
                 'text': completion.name,
                 'type': self._get_definition_type(completion),
